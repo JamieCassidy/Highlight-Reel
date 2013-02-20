@@ -3,7 +3,7 @@
 /*
 Plugin Name: Highlight Reel
 Plugin URI: http://www.highlightreelwp.com
-Description: Simple plugin that allows you to display up to 10 latest shots from Dribbble.
+Description: A simple plugin that enables you to easily display your latest Dribbble shots on your website.
 Author: Jamie Cassidy
 Version: 1.0
 Author URI: http://www.jamiecassidy.co.uk
