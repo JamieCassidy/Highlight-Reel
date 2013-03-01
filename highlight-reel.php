@@ -15,6 +15,7 @@ class HighlightReel {
     private $shots_to_show;
     private $plugin_path;
     private $cache_path;
+    private $feed_url;
 
     function __construct() 
     {	
@@ -22,6 +23,7 @@ class HighlightReel {
     	$this->shots_to_show = get_option( 'hr_shots_to_show' );
     	$this->plugin_path = plugin_dir_path(__FILE__);
     	$this->cache_path = $this->plugin_path . '/cache/';
+    	$this->feed_url = "http://api.dribbble.com/players/" . $this->dribbble_username . "/shots?per_page=" . $this->shots_to_show;
     	
         register_activation_hook( __FILE__, array($this, 'hr_activate') );
         
@@ -49,6 +51,10 @@ class HighlightReel {
     function hr_options() {
     	if (!current_user_can( 'manage_options' )) {
     		wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+    	}
+    	
+    	if(isset($_POST['hr_dribbble_username'])) {
+    		$this->hr_force_fresh_feed( $this->feed_url, $this->dribbble_username );
     	}
     	
     	echo '<div class="wrap">' . PHP_EOL;
@@ -79,9 +85,11 @@ class HighlightReel {
     	
     	} else {
     		
-    		$url = "http://api.dribbble.com/players/" . $this->dribbble_username . "/shots?per_page=" . $this->shots_to_show;
-    		$shots = $this->hr_get_feed( $url, $this->dribbble_username );
-    		$shots = json_decode( $shots );
+    		
+    		$shots = $this->hr_get_feed( $this->feed_url, $this->dribbble_username );
+    		if(sizeof($shots->shots) != $this->shots_to_show) {
+    			$shots = $this->hr_force_fresh_feed( $this->feed_url, $this->dribbble_username );
+    		}
     		
     		//print_r( $shots );
     		
@@ -129,7 +137,16 @@ class HighlightReel {
 			$result = file_get_contents($cache);
     	}
     	
-    	return $result;
+    	return json_decode($result);
+    }
+    
+    function hr_force_fresh_feed($url, $username) {
+    	$cache = $this->cache_path . $username . '.cache';
+    	$json = $this->do_curl($url);
+    	file_put_contents($cache, $json);
+    	$result = file_get_contents($cache);
+    	
+    	return json_decode($result);
     }
     
     function do_curl($url) {
