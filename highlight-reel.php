@@ -15,6 +15,7 @@ class HighlightReel {
     private $shots_to_show;
     private $plugin_path;
     private $cache_path;
+  	private $feed_url;
 
     function __construct() 
     {	
